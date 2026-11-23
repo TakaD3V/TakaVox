@@ -1,0 +1,37 @@
+# saidas de compilacao
+build/
+native/takavox_df/target/
+*.exe
+*.dll
+*.pdb
+*.obj
+*.lib
+*.exp
+*.ilk
+
+# Visual Studio / editores
+.vs/
+.vscode/
+*.user
+*.suo
+
+# codigo do DeepFilterNet (baixado por native/get_deepfilternet.ps1)
+native/DeepFilterNet-0.5.6/
+
+# VST 3 SDK da Steinberg (baixado por native/get_vst3sdk.ps1)
+native/vst3sdk/
+
+# VB-CABLE nao pode ser redistribuido dentro do repositorio
+third_party/
+
+# audios gerados pelos testes
+bench/
+*.wav
+
+# arquivos de voz com IA (Beatrice): os termos nao permitem redistribuir
+*.bin
+beatrice*.zip
+
+# lixo do Windows
+Thumbs.db
+desktop.ini

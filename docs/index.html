@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TakaVox — estúdio de voz com IA para Discord, jogos e lives</title>
+<meta name="description" content="Estúdio de voz com IA para Windows: tira o ruído do teclado e da ventoinha, muda a sua voz (até com IA), toca sons com teclas de atalho e roda plugins VST no Discord, jogos e lives — sem tirar FPS. Grátis e de código aberto.">
+<link rel="canonical" href="https://takad3v.github.io/TakaVox/">
+<link rel="icon" type="image/png" href="icon.png">
+<meta name="theme-color" content="#0d0a15">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="TakaVox">
+<meta property="og:title" content="TakaVox — estúdio de voz com IA">
+<meta property="og:description" content="Tira o barulho do teclado e da ventoinha, muda a sua voz e toca sons com teclas de atalho no Discord, nos jogos e na live — sem tirar FPS.">
+<meta property="og:url" content="https://takad3v.github.io/TakaVox/">
+<meta property="og:image" content="https://takad3v.github.io/TakaVox/banner.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta property="og:image:alt" content="TakaVox — estúdio de voz com IA para Discord, jogos e lives">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0d0a15;
+  --card:#161222;
+  --line:rgba(255,255,255,.08);
+  --line-2:rgba(255,255,255,.15);
+  --text:#efeaf8;
+  --muted:#aaa2c2;
+  --dim:#8a83a3;
+  --violet:#8b5cf6;
+  --violet-2:#b39dfc;
+  --pink:#f0378b;
+  --green:#34d399;
+  --grad:linear-gradient(120deg,#7c4dff 0%,#b73cf5 48%,#f0378b 100%);
+  --radius:16px;
+  --font:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Roboto,Arial,sans-serif;
+  --font-display:"Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:80px;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{max-width:100%;height:auto;display:block}
+a{color:var(--violet-2);text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--violet-2);outline-offset:3px;border-radius:8px}
+b,strong{font-weight:650}
+.wrap{width:100%;max-width:1160px;margin:0 auto;padding:0 20px}
+.i{width:22px;height:22px;flex:none}
+.skip{position:absolute;left:-999px;top:10px;z-index:100;padding:8px 14px;border-radius:10px;background:var(--violet);color:#fff}
+.skip:focus{left:12px}
+
+/* topo */
+.nav{position:sticky;top:0;z-index:50;background:rgba(13,10,21,.74);-webkit-backdrop-filter:saturate(160%) blur(14px);backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line)}
+.nav-in{display:flex;align-items:center;gap:16px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;color:var(--text);font:700 19px/1 var(--font-display);letter-spacing:-.01em}
+.brand:hover{text-decoration:none}
+.links{display:flex;gap:2px;margin-left:14px}
+.links a{padding:8px 12px;border-radius:10px;color:var(--muted);font-size:15px}
+.links a:hover{color:var(--text);background:rgba(255,255,255,.05);text-decoration:none}
+.nav-cta{display:flex;align-items:center;gap:10px;margin-left:auto}
+.icon-btn{display:grid;place-items:center;width:40px;height:40px;border:1px solid var(--line);border-radius:12px;color:var(--muted)}
+.icon-btn:hover{color:var(--text);border-color:var(--line-2);text-decoration:none}
+@media (max-width:880px){.links{display:none}}
+
+/* botões */
+.btn{display:inline-flex;align-items:center;gap:12px;padding:10px 18px;border:0;border-radius:12px;background:var(--grad);color:#fff;font-weight:650;box-shadow:0 10px 30px -10px rgba(183,60,245,.65),inset 0 1px 0 rgba(255,255,255,.2);transition:transform .15s ease,box-shadow .15s ease}
+.btn:hover{text-decoration:none;transform:translateY(-1px);box-shadow:0 16px 40px -12px rgba(183,60,245,.8),inset 0 1px 0 rgba(255,255,255,.22)}
+.btn-sm{padding:8px 16px;border-radius:11px;font-size:15px}
+.btn-lg{padding:14px 24px;border-radius:14px;text-align:left}
+.btn-lg>span{display:flex;flex-direction:column;line-height:1.25}
+.btn-lg strong{font-size:17px}
+.btn-lg small{font-size:13px;font-weight:500;opacity:.88}
+.btn-ghost{background:rgba(255,255,255,.04);border:1px solid var(--line-2);box-shadow:none;color:var(--text)}
+.btn-ghost:hover{background:rgba(255,255,255,.08);box-shadow:none}
+
+/* abertura */
+.hero{position:relative;isolation:isolate;padding:76px 0 36px;text-align:center}
+.hero::before{content:"";position:absolute;inset:-64px 0 0;z-index:-1;background:
+  radial-gradient(55% 45% at 18% 0%,rgba(124,77,255,.34),transparent 70%),
+  radial-gradient(42% 38% at 86% 8%,rgba(240,55,139,.2),transparent 70%),
+  radial-gradient(50% 40% at 50% 72%,rgba(124,77,255,.16),transparent 70%)}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;margin:0 0 22px;padding:6px 14px;border:1px solid var(--line-2);border-radius:999px;background:rgba(255,255,255,.03);color:var(--muted);font-size:14px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(52,211,153,.16)}
+h1{max-width:920px;margin:0 auto;font:800 clamp(34px,5.6vw,64px)/1.06 var(--font-display);letter-spacing:-.025em;text-wrap:balance}
+.grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{max-width:730px;margin:22px auto 0;color:var(--muted);font-size:clamp(17px,2vw,20px);line-height:1.55;text-wrap:pretty}
+.cta{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-top:32px}
+.fine{margin:14px 0 0;color:var(--dim);font-size:14px}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-width:720px;margin:26px auto 0;padding:0;list-style:none}
+.chips li{padding:6px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.05);font-size:14px}
+.hero-shot{max-width:1040px;margin:52px auto 0}
+@media (max-width:520px){.cta .btn{width:100%;justify-content:center}}
+
+/* capturas */
+.shot{margin:0;overflow:hidden;border:1px solid var(--line-2);border-radius:14px;background:#15151d;box-shadow:0 30px 80px -30px rgba(124,77,255,.55),0 12px 30px -12px rgba(0,0,0,.6)}
+.shot a{display:block;cursor:zoom-in}
+.shot img{width:100%}
+
+/* números */
+.stats{padding:28px 0 0}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.stat{padding:22px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01))}
+.stat b{display:block;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;font:800 34px/1.1 var(--font-display);letter-spacing:-.02em}
+.stat span{display:block;margin-top:6px;color:var(--muted);font-size:15px;line-height:1.45}
+.note{margin:12px 0 0;color:var(--dim);font-size:13px}
+.center{text-align:center}
+@media (max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:440px){.stats-grid{grid-template-columns:1fr}}
+
+/* seções */
+.section{padding:96px 0}
+.section.alt{background:linear-gradient(180deg,transparent,rgba(124,77,255,.055) 18%,rgba(124,77,255,.055) 82%,transparent)}
+.head{max-width:760px;margin:0 auto 48px;text-align:center}
+.kicker{margin:0 0 10px;color:var(--violet-2);font-size:14px;font-weight:650;letter-spacing:.08em;text-transform:uppercase}
+h2{margin:0;font:800 clamp(28px,4vw,44px)/1.12 var(--font-display);letter-spacing:-.02em;text-wrap:balance}
+.sub{margin:14px 0 0;color:var(--muted);font-size:18px;text-wrap:pretty}
+h3{margin:0 0 8px;font:700 19px/1.3 var(--font-display);letter-spacing:-.01em}
+@media (max-width:600px){.section{padding:72px 0}}
+
+/* recursos */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.card{padding:24px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);transition:border-color .2s ease,transform .2s ease}
+.card:hover{border-color:rgba(179,157,252,.35);transform:translateY(-2px)}
+.card p{margin:0;color:var(--muted);font-size:15.5px}
+.ico{display:grid;place-items:center;width:44px;height:44px;margin-bottom:16px;border-radius:12px;background:linear-gradient(135deg,rgba(124,77,255,.92),rgba(240,55,139,.86));box-shadow:0 8px 24px -8px rgba(183,60,245,.65);color:#fff}
+
+/* telas */
+.rows{display:grid;gap:110px}
+.row{display:grid;grid-template-columns:5fr 7fr;gap:56px;align-items:center}
+.row.flip .txt{order:2}
+.txt h3{margin-bottom:6px;font-size:clamp(24px,2.6vw,30px);letter-spacing:-.015em}
+.sub2{margin:0 0 18px;color:var(--muted);font-size:17px}
+.checks{display:grid;gap:12px;margin:0;padding:0;list-style:none}
+.checks li{position:relative;padding-left:32px}
+.checks li::before{content:"";position:absolute;left:0;top:3px;width:20px;height:20px;border-radius:50%;background:rgba(52,211,153,.15) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2334d399' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/12px no-repeat}
+.media{position:relative}
+.media .inset{position:absolute;right:-18px;bottom:-36px;width:46%;box-shadow:0 24px 60px -16px rgba(0,0,0,.8),0 0 0 1px rgba(179,157,252,.28)}
+.media.tall .shot{max-width:430px;margin:0 auto}
+.wide{margin-top:110px;text-align:center}
+.wide h3{margin-bottom:0;font-size:clamp(24px,2.6vw,30px);letter-spacing:-.015em}
+.wide .sub{max-width:700px;margin-left:auto;margin-right:auto}
+.wide .shot{max-width:1040px;margin:32px auto 0}
+@media (max-width:900px){
+  .rows{gap:80px}
+  .row{grid-template-columns:1fr;gap:28px}
+  .row.flip .txt{order:0}
+  .media .inset{position:static;width:80%;margin:14px auto 0}
+  .wide{margin-top:80px}
+}
+
+/* desempenho */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media (max-width:900px){.grid3{grid-template-columns:1fr}}
+
+/* instalar */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:0;padding:0;list-style:none;counter-reset:passo}
+.steps li{padding:24px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);counter-increment:passo}
+.steps li::before{content:counter(passo);display:grid;place-items:center;width:36px;height:36px;margin-bottom:14px;border-radius:50%;background:var(--grad);color:#fff;font-weight:800}
+.steps p{margin:0;color:var(--muted);font-size:15.5px}
+.steps b{color:var(--text)}
+@media (max-width:1000px){.steps{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:600px){.steps{grid-template-columns:1fr}}
+.callout{display:flex;align-items:flex-start;gap:18px;margin-top:20px;padding:24px;border:1px solid rgba(179,157,252,.3);border-radius:var(--radius);background:linear-gradient(135deg,rgba(124,77,255,.13),rgba(240,55,139,.06))}
+.callout .ico{flex:none;margin:0}
+.callout p{margin:0;color:var(--muted)}
+.callout b{color:var(--text)}
+.req{margin:20px 0 0;color:var(--dim);font-size:14px;text-align:center}
+
+/* atalhos */
+.narrow{max-width:840px}
+table{width:100%;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius);border-spacing:0;background:var(--card)}
+th,td{padding:14px 18px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{background:rgba(255,255,255,.025);color:var(--dim);font-size:13px;font-weight:650;letter-spacing:.06em;text-transform:uppercase}
+td{color:var(--muted)}
+td:first-child{width:1%;white-space:nowrap;color:var(--text)}
+kbd{display:inline-block;min-width:26px;padding:1px 8px;border:1px solid var(--line-2);border-bottom-width:2px;border-radius:7px;background:rgba(255,255,255,.05);color:var(--text);font:600 13px/1.7 var(--font);text-align:center}
+@media (max-width:560px){td:first-child{white-space:normal}th,td{padding:12px 14px}}
+
+/* dúvidas */
+.faq{display:grid;gap:10px}
+.faq details{padding:0 20px;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+.faq details[open]{border-color:rgba(179,157,252,.32)}
+.faq summary{position:relative;padding:18px 34px 18px 0;cursor:pointer;font-size:17px;font-weight:650;list-style:none}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"";position:absolute;right:4px;top:50%;width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:translateY(-70%) rotate(45deg);transition:transform .2s ease}
+.faq details[open] summary::after{transform:translateY(-25%) rotate(-135deg)}
+.faq p{margin:0 0 18px;color:var(--muted)}
+code{padding:2px 6px;border-radius:6px;background:rgba(255,255,255,.07);font:.9em "Cascadia Code",Consolas,monospace}
+
+/* chamada final e rodapé */
+.final{padding:40px 0 100px}
+.final-in{display:flex;flex-direction:column;align-items:center;gap:6px;padding:56px 24px;border:1px solid rgba(179,157,252,.28);border-radius:24px;background:radial-gradient(70% 90% at 50% 0%,rgba(124,77,255,.26),transparent 70%),var(--card);text-align:center}
+.final-in img{margin-bottom:10px}
+.final-in p{margin:6px 0 24px;color:var(--muted);font-size:18px}
+.foot{padding:36px 0 52px;border-top:1px solid var(--line);color:var(--dim);font-size:14px}
+.foot-in{display:grid;gap:12px}
+.foot p{margin:0}
+.foot a{color:var(--muted)}
+
+/* ampliar captura */
+#zoom{max-width:96vw;max-height:94vh;padding:0;overflow:visible;border:0;background:transparent}
+#zoom::backdrop{background:rgba(6,4,12,.88)}
+#zoom img{width:auto;max-width:96vw;max-height:94vh;border-radius:12px;box-shadow:0 30px 90px rgba(0,0,0,.7);cursor:zoom-out}
+#zoom button{position:fixed;top:14px;right:16px;width:44px;height:44px;border:1px solid var(--line-2);border-radius:50%;background:rgba(22,18,34,.92);color:#fff;font-size:26px;line-height:1;cursor:pointer}
+
+/* aparecer ao rolar */
+.js .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+.js .reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .js .reveal{opacity:1;transform:none;transition:none}
+  .btn,.card{transition:none}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6 4v5M6 13v7M12 4v11M12 19v1M18 4v1M18 9v11"/><circle cx="6" cy="11" r="2"/><circle cx="12" cy="17" r="2"/><circle cx="18" cy="7" r="2"/></symbol>
+  <symbol id="i-mask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5c5.2 2 10.8 2 16 0V11a8 8 0 0 1-16 0z"/><path d="M8.3 10.3h2.2M13.5 10.3h2.2M9.3 14.6c1.6 1.2 3.8 1.2 5.4 0"/></symbol>
+  <symbol id="i-pad" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><path d="M15.4 14.6v4.8l3.9-2.4z" fill="currentColor"/></symbol>
+  <symbol id="i-plug" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v5M15 3v5M6.5 8h11v3a5.5 5.5 0 0 1-11 0zM12 16.5V21"/></symbol>
+  <symbol id="i-note" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17.5V6l11-2v11.5"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="15.5" r="2.5"/></symbol>
+  <symbol id="i-palette" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.9-.8 1.9-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.8-.5-1.2 0-1 .8-1.8 1.8-1.8h2.1a4.2 4.2 0 0 0 4.2-4.2C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="10" cy="7.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="14.6" cy="7.5" r="1.1" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-game" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 7.5h9a4.5 4.5 0 0 1 4.4 3.6l.8 4.3a2.4 2.4 0 0 1-4.1 2.1l-2.1-2h-7l-2.1 2a2.4 2.4 0 0 1-4.1-2.1l.8-4.3a4.5 4.5 0 0 1 4.4-3.6z"/><path d="M8 10v3M6.5 11.5h3"/><circle cx="15.5" cy="10.8" r=".9" fill="currentColor" stroke="none"/><circle cx="17.4" cy="12.7" r=".9" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M11 3l1.9 5.1L18 10l-5.1 1.9L11 17l-1.9-5.1L4 10l5.1-1.9zM18.5 14.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></symbol>
+  <symbol id="i-gh" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></symbol>
+</svg>
+
+<a class="skip" href="#recursos">Pular para o conteúdo</a>
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="#topo"><img src="icon.png" width="32" height="32" alt=""><span>TakaVox</span></a>
+    <nav class="links" aria-label="Seções">
+      <a href="#recursos">Recursos</a>
+      <a href="#telas">Telas</a>
+      <a href="#desempenho">Desempenho</a>
+      <a href="#instalar">Instalar</a>
+      <a href="#duvidas">Dúvidas</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="icon-btn" href="https://github.com/TakaD3V/TakaVox" aria-label="Código do TakaVox no GitHub"><svg class="i" aria-hidden="true"><use href="#i-gh"/></svg></a>
+      <a class="btn btn-sm" data-download href="https://github.com/TakaD3V/TakaVox/releases/latest">Baixar</a>
+    </div>
+  </div>
+</header>
+
+<main id="topo">
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow"><span class="dot"></span>Grátis e de código aberto · Windows 10 e 11</p>
+      <h1>Sua voz com som de <span class="grad">estúdio</span> no Discord, nos jogos e na live</h1>
+      <p class="lead">O TakaVox tira o barulho do teclado e da ventoinha com IA, muda a sua voz (até com IA), toca sons com teclas de atalho e roda plugins VST — sem tirar FPS do jogo.</p>
+      <div class="cta">
+        <a class="btn btn-lg" data-download href="https://github.com/TakaD3V/TakaVox/releases/latest">
+          <svg class="i" aria-hidden="true"><use href="#i-down"/></svg>
+          <span><strong>Baixar para Windows</strong><small data-version>Instalador · 64 bits</small></span>
+        </a>
+        <a class="btn btn-lg btn-ghost" href="https://github.com/TakaD3V/TakaVox">
+          <svg class="i" aria-hidden="true"><use href="#i-gh"/></svg>
+          <span><strong>Ver o código</strong><small>no GitHub</small></span>
+        </a>
+      </div>
+      <p class="fine">Instala só para o seu usuário, sem pedir administrador.</p>
+      <ul class="chips" aria-label="Destaques">
+        <li>IA anti-ruído</li><li>Voz com IA</li><li>Sound pad</li><li>Plugins VST</li><li>Auto-Tune</li><li>Temas</li>
+      </ul>
+      <figure class="shot hero-shot">
+        <a href="screenshots/painel.png"><img src="screenshots/painel.png" width="1164" height="741" alt="Painel do TakaVox: medidores, espectro ao vivo e equalizador arrastável" fetchpriority="high"></a>
+      </figure>
+    </div>
+  </section>
+
+  <section class="stats" aria-label="Números de desempenho">
+    <div class="wrap">
+      <div class="stats-grid">
+        <div class="stat"><b>0,4%</b><span>de um núcleo quando ninguém está te ouvindo</span></div>
+        <div class="stat"><b>~2%</b><span>do processador em call, com a IA anti-ruído ligada</span></div>
+        <div class="stat"><b>~60 MB</b><span>de memória em uso com o app na bandeja</span></div>
+        <div class="stat"><b>32 sons</b><span>tocando juntos com menos de 0,5% de um núcleo</span></div>
+      </div>
+      <p class="note">Medido num Ryzen 5 5500.</p>
+    </div>
+  </section>
+
+  <section id="recursos" class="section">
+    <div class="wrap">
+      <div class="head reveal">
+        <p class="kicker">Recursos</p>
+        <h2>Tudo o que a sua voz precisa, num app só</h2>
+        <p class="sub">Sem DAW e sem configuração complicada: a calibração automática acerta tudo para o seu microfone em 10 segundos.</p>
+      </div>
+      <div class="grid">
+        <article class="card reveal"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-mic"/></svg></div><h3>Voz limpa com IA</h3><p>A IA DeepFilterNet3 tira teclado mecânico, cliques de mouse, ventoinha, rua e chiado sem deixar a voz robótica.</p></article>
+        <article class="card reveal"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-sliders"/></svg></div><h3>Som de estúdio</h3><p>Portão de voz guiado pela IA, nivelador, equalizador de 5 faixas, de-esser, compressor e limitador: a voz nunca estoura.</p></article>
+        <article class="card reveal"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-mask"/></svg></div><h3>Modificador de voz</h3><p>22 vozes prontas e vozes com IA realistas, que soam como outra pessoa falando.</p></article>
+        <article class="card reveal"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-pad"/></svg></div><h3>Sound pad</h3><p>Memes, vinhetas e músicas com tecla de atalho que funciona até dentro do jogo, todos no mesmo volume.</p></article>
+        <article class="card reveal"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-plug"/></svg></div><h3>Plugins VST3 e VST2</h3><p>Os mesmos do FL Studio, Ableton e Reaper, direto na voz. Já vem com ~20 efeitos grátis.</p></article>
+        <article class="card reveal"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-note"/></svg></div><h3>Auto-Tune</h3><p>Em tempo real, do efeito robô no estilo T-Pain até uma correção natural.</p></article>
+        <article class="card reveal"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-palette"/></svg></div><h3>Temas</h3><p>Escuro, OLED, Vidro (com o desfoque do Windows 11), Claro, Neon, Grafite, Oceano e Sakura.</p></article>
+        <article class="card reveal"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-game"/></svg></div><h3>Feito para jogar</h3><p>Economia automática, 0% de CPU na bandeja e áudio no núcleo que os jogos menos usam.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="telas" class="section alt">
+    <div class="wrap">
+      <div class="head reveal">
+        <p class="kicker">Telas</p>
+        <h2>Por dentro do TakaVox</h2>
+        <p class="sub">Clique numa tela para ver em tamanho real.</p>
+      </div>
+
+      <div class="rows">
+        <div class="row">
+          <div class="txt reveal">
+            <h3>Sound pad</h3>
+            <p class="sub2">Memes, vinhetas e músicas misturados com a sua voz.</p>
+            <ul class="checks">
+              <li><b>Tecla de atalho em 1 clique</b>, que funciona até dentro do jogo em tela cheia. O teclado numérico e F1–F11 funcionam sozinhos.</li>
+              <li>Todos os sons no mesmo volume, com trecho, fade e loop.</li>
+              <li>Abaixa a sua voz enquanto um som toca e, se você quiser, toca mesmo com o mic no mudo.</li>
+              <li>Para quem te escuta, para o seu fone ou para os dois. Lê MP3, WAV, M4A, WMA, FLAC e OGG.</li>
+            </ul>
+          </div>
+          <div class="media reveal">
+            <figure class="shot"><a href="screenshots/sound-pad.png"><img src="screenshots/sound-pad.png" width="1164" height="741" loading="lazy" decoding="async" alt="Sound pad: pads com emoji, cor, categorias e a tecla de cada som"></a></figure>
+            <figure class="shot inset"><a href="screenshots/sound-pad-tecla.png"><img src="screenshots/sound-pad-tecla.png" width="454" height="293" loading="lazy" decoding="async" alt="Definir a tecla de um som: clique no teclado do pad e aperte a tecla"></a></figure>
+          </div>
+        </div>
+
+        <div class="row flip">
+          <div class="txt reveal">
+            <h3>Cada som do seu jeito</h3>
+            <p class="sub2">O editor mostra a forma de onda e acerta tudo sem programa de áudio.</p>
+            <ul class="checks">
+              <li>Escolha o trecho na forma de onda. O silêncio do começo do arquivo sai sozinho.</li>
+              <li>Volume em LUFS com teto de pico: nenhum som estoura no ouvido de ninguém.</li>
+              <li>Fade de entrada e de saída, loop e o jeito de tocar: recomeça, para ou sobrepõe.</li>
+              <li>Emoji, cor e categoria para achar rápido no meio da partida.</li>
+            </ul>
+          </div>
+          <div class="media tall reveal">
+            <figure class="shot"><a href="screenshots/sound-pad-editor.png"><img src="screenshots/sound-pad-editor.png" width="634" height="761" loading="lazy" decoding="async" alt="Editor de som: trecho na forma de onda, volume em LUFS, fades, loop e atalho"></a></figure>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="txt reveal">
+            <h3>Modificador de voz</h3>
+            <p class="sub2">De garota de anime a demônio, ao vivo.</p>
+            <ul class="checks">
+              <li>22 vozes prontas (garota de anime, robô, monstro, demônio, rádio, telefone…), com tom e timbre separados.</li>
+              <li><b>Vozes com IA</b> realistas (Beatrice 2): Tsukuyomi-chan, Tokina Shigure, OLUNE e mais 100 vozes.</li>
+              <li>O tom da voz com IA se ajusta sozinho à sua voz.</li>
+              <li>Roda no processador, sem placa de vídeo. Se a IA falhar, a sua voz normal volta.</li>
+            </ul>
+          </div>
+          <div class="media reveal">
+            <figure class="shot"><a href="screenshots/modificador.png"><img src="screenshots/modificador.png" width="1164" height="741" loading="lazy" decoding="async" alt="Modificador de voz: vozes com IA e 22 vozes prontas"></a></figure>
+          </div>
+        </div>
+
+        <div class="row flip">
+          <div class="txt reveal">
+            <h3>Cadeia de estúdio</h3>
+            <p class="sub2">Cada etapa do som profissional, já ajustada para você.</p>
+            <ul class="checks">
+              <li>IA anti-ruído <b>DeepFilterNet3</b>, com a versão de baixa latência, e o RNNoise como opção leve.</li>
+              <li>Removedor de ventoinha e zumbido: acha os "apitos" fixos do PC e corta cada um.</li>
+              <li>Portão de voz guiado pela IA, nivelador, EQ de 5 faixas, de-esser, compressor e limitador.</li>
+              <li>Ajuste fino de cada etapa, para quem gosta de mexer.</li>
+            </ul>
+          </div>
+          <div class="media reveal">
+            <figure class="shot"><a href="screenshots/efeitos.png"><img src="screenshots/efeitos.png" width="1164" height="741" loading="lazy" decoding="async" alt="Efeitos: cada etapa da cadeia de estúdio, com ajuste fino"></a></figure>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="txt reveal">
+            <h3>Seus plugins VST, sem DAW</h3>
+            <p class="sub2">Os mesmos do FL Studio, Ableton e Reaper, direto na voz.</p>
+            <ul class="checks">
+              <li>VST3 e VST2 de 64 bits, numa janela no estilo do FL Studio.</li>
+              <li>O plugin original embutido ou um painel de knobs, com presets de fábrica e os seus.</li>
+              <li>Cada plugin é lido num processo separado: se um travar, ele é desligado sem derrubar a voz.</li>
+              <li>~20 efeitos grátis já vêm junto.</li>
+            </ul>
+          </div>
+          <div class="media reveal">
+            <figure class="shot"><a href="screenshots/plugins.png"><img src="screenshots/plugins.png" width="1164" height="741" loading="lazy" decoding="async" alt="Plugins: VST3 e VST2 na sua voz, sem DAW"></a></figure>
+            <figure class="shot inset"><a href="screenshots/plugin-estilo-fl.png"><img src="screenshots/plugin-estilo-fl.png" width="526" height="204" loading="lazy" decoding="async" alt="Janela de plugin no estilo do FL Studio"></a></figure>
+          </div>
+        </div>
+
+        <div class="row flip">
+          <div class="txt reveal">
+            <h3>Calibre e ouça o antes × depois</h3>
+            <p class="sub2">Tudo acertado em 10 segundos, antes de entrar na call.</p>
+            <ul class="checks">
+              <li>Calibração automática: 3 s em silêncio e 7 s falando. O app acerta o ganho, o portão e o equalizador para o seu mic.</li>
+              <li>Grave um teste e compare no fone o original e o TakaVox.</li>
+              <li>A gravação fica só na memória do app: nada é salvo nem enviado.</li>
+            </ul>
+          </div>
+          <div class="media reveal">
+            <figure class="shot"><a href="screenshots/testar-voz.png"><img src="screenshots/testar-voz.png" width="1164" height="741" loading="lazy" decoding="async" alt="Testar voz: calibração automática e gravação para comparar antes e depois"></a></figure>
+          </div>
+        </div>
+      </div>
+
+      <div class="wide reveal">
+        <h3>Temas para todo setup</h3>
+        <p class="sub">Escuro, OLED, Vidro (com o desfoque do Windows 11), Claro, Neon, Grafite, Oceano e Sakura.</p>
+        <figure class="shot"><a href="screenshots/temas.png"><img src="screenshots/temas.png" width="1280" height="760" loading="lazy" decoding="async" alt="Os temas do TakaVox lado a lado"></a></figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="desempenho" class="section">
+    <div class="wrap">
+      <div class="head reveal">
+        <p class="kicker">Desempenho</p>
+        <h2>Feito para jogar e para live</h2>
+        <p class="sub">Leve quando ninguém está te ouvindo, firme quando todo mundo está.</p>
+      </div>
+      <div class="grid3">
+        <article class="card reveal"><h3>Economia automática</h3><p>Quando nenhum app (Discord, jogo, OBS) está usando o microfone virtual, a IA para e o TakaVox usa 0,4% de um núcleo. Assim que um app abre o microfone, ele volta antes da primeira palavra.</p></article>
+        <article class="card reveal"><h3>Na bandeja</h3><p>A interface fica parada (0% de CPU) e a memória da tela volta para o Windows: de ~230 MB para ~60 MB em uso. Nada é desenhado com um jogo em tela cheia na frente.</p></article>
+        <article class="card reveal"><h3>Áudio sem estalo</h3><p>As threads de áudio preferem o núcleo que os jogos menos usam. A voz com IA roda numa thread própria, com folga, e se falhar a sua voz normal volta sozinha: o microfone nunca fica mudo.</p></article>
+      </div>
+      <p class="note center">Funciona com Valorant e outros jogos com anti-cheat: o TakaVox é um app de áudio comum e não injeta nada no jogo.</p>
+    </div>
+  </section>
+
+  <section id="instalar" class="section alt">
+    <div class="wrap">
+      <div class="head reveal">
+        <p class="kicker">Instalar</p>
+        <h2>Pronto em 2 minutos</h2>
+      </div>
+      <ol class="steps">
+        <li class="reveal"><h3>Baixe e execute</h3><p>Se aparecer "O Windows protegeu o computador", clique em <b>Mais informações › Executar assim mesmo</b>. O app ainda não tem certificado pago.</p></li>
+        <li class="reveal"><h3>Siga o guia</h3><p><b>Instale o microfone virtual</b> com 1 clique (o app baixa o VB-CABLE oficial e confere a assinatura) e <b>calibre</b> em 10 s.</p></li>
+        <li class="reveal"><h3>Ajuste o Discord</h3><p>Em Voz e vídeo: entrada <b>Padrão</b>, <b>Supressão de ruído: Nenhuma</b> e controle automático de ganho desligado.</p></li>
+        <li class="reveal"><h3>Jogos e OBS</h3><p>Nos jogos, deixe o microfone no padrão do Windows. No OBS, adicione o <b>CABLE Output</b> como microfone.</p></li>
+      </ol>
+      <div class="callout reveal">
+        <div class="ico"><svg class="i" aria-hidden="true"><use href="#i-spark"/></svg></div>
+        <div>
+          <h3>Voz com IA (opcional)</h3>
+          <p>As vozes com IA usam o <a href="https://prj-beatrice.com/" rel="noopener">Beatrice 2</a>, um conversor de voz gratuito. Os termos dele não permitem redistribuir, então você baixa no site oficial e o TakaVox importa os arquivos em <b>Modificador de voz › Vozes com IA</b>.</p>
+        </div>
+      </div>
+      <p class="req">Requisitos: Windows 10 ou 11, 64 bits.</p>
+    </div>
+  </section>
+
+  <section id="atalhos" class="section">
+    <div class="wrap narrow">
+      <div class="head reveal">
+        <p class="kicker">Atalhos</p>
+        <h2>Funcionam até dentro do jogo</h2>
+      </div>
+      <table class="reveal">
+        <thead><tr><th scope="col">Atalho</th><th scope="col">O que faz</th></tr></thead>
+        <tbody>
+          <tr><td><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>M</kbd></td><td>Mudo</td></tr>
+          <tr><td><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>V</kbd></td><td>Liga e desliga o modificador de voz</td></tr>
+          <tr><td><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>T</kbd></td><td>Liga e desliga o Auto-Tune</td></tr>
+          <tr><td><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>B</kbd></td><td>Liga e desliga todos os efeitos (antes × depois)</td></tr>
+          <tr><td><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>P</kbd></td><td>Para todos os sons do sound pad</td></tr>
+          <tr><td>A sua escolha</td><td>Cada som do sound pad. <b>Teclas automáticas</b> coloca Num 1…Num 0 de uma vez.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="duvidas" class="section alt">
+    <div class="wrap narrow">
+      <div class="head reveal">
+        <p class="kicker">Dúvidas</p>
+        <h2>Perguntas frequentes</h2>
+      </div>
+      <div class="faq">
+        <details class="reveal"><summary>Tira FPS?</summary><p>Na prática, não. Sem ninguém te ouvindo, ele descansa. Em call, usa ~2% do processador, longe dos núcleos que o jogo mais usa.</p></details>
+        <details class="reveal"><summary>Funciona no Valorant e com anti-cheat?</summary><p>Sim. O TakaVox é um app de áudio comum: não injeta nada no jogo e usa os atalhos normais do Windows.</p></details>
+        <details class="reveal"><summary>É grátis mesmo?</summary><p>Sim, e o código é aberto, com licença MIT. O microfone virtual (VB-CABLE) é donationware: se puder, apoie o autor.</p></details>
+        <details class="reveal"><summary>Os sons do sound pad cortam no Discord.</summary><p>Desligue a Supressão de ruído (Krisp) do Discord. Ela trata música e efeitos como ruído, e o TakaVox já limpa a sua voz.</p></details>
+        <details class="reveal"><summary>Como volto tudo como era antes?</summary><p>Em <b>Configurar › Restaurar tudo como era antes</b> (microfone padrão, volume do mic e inicialização). Para desinstalar, use "Aplicativos instalados" do Windows.</p></details>
+        <details class="reveal"><summary>Onde ficam os meus dados?</summary><p>Em <code>%APPDATA%\TakaVox</code>: ajustes, vozes salvas, sound pad, presets de plugins e a voz com IA.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="final">
+    <div class="wrap">
+      <div class="final-in reveal">
+        <img src="icon.png" width="72" height="72" alt="">
+        <h2>Pronto para soar como estúdio?</h2>
+        <p>Grátis, de código aberto e sem pedir administrador.</p>
+        <a class="btn btn-lg" data-download href="https://github.com/TakaD3V/TakaVox/releases/latest">
+          <svg class="i" aria-hidden="true"><use href="#i-down"/></svg>
+          <span><strong>Baixar para Windows</strong><small data-version>Instalador · 64 bits</small></span>
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <a class="brand" href="#topo"><img src="icon.png" width="28" height="28" alt=""><span>TakaVox</span></a>
+    <p>Feito por Taka · licença MIT · <a href="https://github.com/TakaD3V/TakaVox">GitHub</a> · <a href="https://github.com/TakaD3V/TakaVox/releases">Versões</a> · <a href="https://github.com/TakaD3V/TakaVox/blob/main/CHANGELOG.md">Novidades</a> · <a href="https://github.com/TakaD3V/TakaVox/blob/main/THIRD_PARTY_NOTICES.md">Licenças de terceiros</a></p>
+    <p>Usa DeepFilterNet (Hendrik Schröter), RNNoise (Xiph.Org) e o VST 3 SDK (Steinberg). VST é marca registrada da Steinberg Media Technologies GmbH. O VB-CABLE e o Beatrice 2 não vêm no instalador: o app usa os downloads oficiais.</p>
+  </div>
+</footer>
+
+<dialog id="zoom" aria-label="Tela ampliada"><img alt=""><button type="button" aria-label="Fechar">×</button></dialog>
+
+<script>
+(function () {
+  var OWNER = 'TakaD3V', REPO = 'TakaVox', d = document;
+
+  // aparecer ao rolar (sem o observador, tudo já aparece)
+  if ('IntersectionObserver' in window) {
+    d.documentElement.classList.add('js');
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { rootMargin: '0px 0px -6% 0px' });
+    d.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+  }
+
+  // ampliar as telas
+  var dlg = d.getElementById('zoom');
+  if (dlg && dlg.showModal) {
+    var big = dlg.querySelector('img');
+    d.querySelectorAll('.shot a').forEach(function (a) {
+      a.addEventListener('click', function (ev) {
+        ev.preventDefault();
+        var img = a.querySelector('img');
+        big.src = a.getAttribute('href');
+        big.alt = img ? img.alt : '';
+        dlg.showModal();
+      });
+    });
+    dlg.addEventListener('click', function () { dlg.close(); });
+  }
+
+  // botão de baixar aponta direto para o instalador da última versão
+  if (!window.fetch) return;
+  fetch('https://api.github.com/repos/' + OWNER + '/' + REPO + '/releases/latest', { headers: { 'Accept': 'application/vnd.github+json' } })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (rel) {
+      if (!rel || !rel.assets) return;
+      var exe = rel.assets.filter(function (a) { return /\.exe$/i.test(a.name); })[0];
+      if (!exe) return;
+      var mb = Math.round(exe.size / 1048576);
+      d.querySelectorAll('[data-download]').forEach(function (a) { a.href = exe.browser_download_url; });
+      d.querySelectorAll('[data-version]').forEach(function (s) { s.textContent = 'Versão ' + rel.tag_name.replace(/^v/, '') + ' · ' + mb + ' MB'; });
+    })
+    .catch(function () {});
+})();
+</script>
+</body>
+</html>

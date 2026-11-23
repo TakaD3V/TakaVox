@@ -1,0 +1,26 @@
+[package]
+name = "takavox_df"
+version = "1.0.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Ponte C (DLL) entre o TakaVox e a IA DeepFilterNet3, com os modelos embutidos"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+path = "src/lib.rs"
+
+[dependencies]
+deep_filter = { path = "../DeepFilterNet-0.5.6/libDF", default-features = false, features = ["tract"] }
+ndarray = "0.15"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 4
+debug = false
+strip = true
+panic = "unwind"
+
+# projeto independente (nao faz parte do workspace do DeepFilterNet)
+[workspace]
